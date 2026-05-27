@@ -1,18 +1,48 @@
 ---
-- name: Install nginx
-  apt:
-    name: nginx
-    state: present
-    update_cache: yes
+- name: Configure Nginx with error handling
+  block:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
 
-- name: Copy nginx config template
-  template:
-    src: nginx.conf.j2
-    dest: /etc/nginx/sites-available/default
-  notify: restart nginx
+    - name: Copy nginx config template
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+      notify: restart nginx
 
-- name: Ensure nginx is running
-  service:
-    name: nginx
-    state: started
-    enabled: yes
+    - name: Create nginx config symlink
+      file:
+        src: /etc/nginx/sites-available/default
+        dest: /etc/nginx/sites-enabled/default
+        state: link
+
+    - name: Test nginx configuration
+      command: nginx -t
+      register: nginx_test
+      changed_when: false
+
+    - name: Show nginx test result
+      debug:
+        msg: "Nginx config is valid"
+      when: nginx_test.rc == 0
+
+  rescue:
+    - name: Handle nginx configuration error
+      debug:
+        msg: "Nginx configuration failed! Rolling back..."
+
+    - name: Restore default nginx config
+      copy:
+        src: /etc/nginx/sites-available/default.backup
+        dest: /etc/nginx/sites-available/default
+      ignore_errors: yes
+
+  always:
+    - name: Ensure nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: yes

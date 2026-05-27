@@ -1,0 +1,39 @@
+---
+- name: Test handlers and error handling
+  hosts: localhost
+  become: no
+  vars:
+    test_mode: "success"
+  tasks:
+    - name: Task that may fail
+      block:
+        - name: Success task
+          debug:
+            msg: "This task always succeeds"
+        
+        - name: Conditional failure task
+          fail:
+            msg: "Intentional failure for testing rescue block"
+          when: test_mode == "failure"
+      
+      rescue:
+        - name: Rescue block - handle error
+          debug:
+            msg: "Error occurred! Running rescue tasks..."
+      
+      always:
+        - name: Always block - cleanup
+          debug:
+            msg: "This runs whether success or failure"
+
+    - name: Test handler notification
+      copy:
+        content: "Test content changed"
+        dest: /tmp/test_handler.txt
+      notify: test handler
+      changed_when: true
+
+  handlers:
+    - name: test handler
+      debug:
+        msg: "Handler triggered due to change"

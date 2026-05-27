@@ -3,3 +3,10 @@
   service:
     name: nginx
     state: restarted
+  listen: "restart nginx services"
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded
+  listen: "reload nginx services"
