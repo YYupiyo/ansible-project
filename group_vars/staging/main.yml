@@ -6,6 +6,5 @@ server_aliases:
   - staging1.example.com
   - staging2.example.com
 db_host: staging-db.example.com
-db_password: "{{ vault_db_password_staging }}"
 app_debug_mode: true
 nginx_worker_processes: 1

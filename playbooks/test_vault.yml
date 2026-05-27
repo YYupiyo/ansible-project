@@ -1,0 +1,15 @@
+---
+- name: Test vault secrets
+  hosts: localhost
+  become: no
+  vars_files:
+    - ../group_vars/staging/vault.yml
+    - ../group_vars/production/vault.yml
+  tasks:
+    - name: Show staging db password
+      debug:
+        msg: "Staging DB password is: {{ vault_db_password_staging }}"
+    
+    - name: Show production db password
+      debug:
+        msg: "Production DB password is: {{ vault_db_password_prod }}"
