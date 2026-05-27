@@ -1,0 +1,8 @@
+---
+- name: Check inventory and connection
+  host: all
+  gather_facts: no
+  tasks:
+    - name: Print environment
+      debug:
+        msg: "Running on {{ inventory_hostname }} in {{ env }} environment"
