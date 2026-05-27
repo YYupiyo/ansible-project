@@ -1,0 +1,65 @@
+---
+- name: Collect and transform system facts
+  hosts: localhost
+  gather_facts: yes
+  vars:
+    network_interfaces:
+      - eth0
+      - enp0s3
+      - docker0
+  tasks:
+    - name: Display all facts
+      debug:
+        var: ansible_facts
+
+    - name: Get specific fact - hostname
+      debug:
+        msg: "Hostname: {{ ansible_facts.hostname }}"
+
+    - name: Get IP addresses using json_query filter
+      debug:
+        msg: "All IPv4 addresses: {{ ansible_facts.all_ipv4_addresses | join(', ') }}"
+
+    - name: Get default IPv4 address (first one)
+      set_fact:
+        primary_ip: "{{ ansible_facts.all_ipv4_addresses[0] }}"
+
+    - name: Display primary IP
+      debug:
+        msg: "Primary IP address: {{ primary_ip }}"
+
+    - name: Filter interfaces starting with 'e'
+      set_fact:
+        ethernet_interfaces: "{{ ansible_facts.interfaces | select('match', '^e') | list }}"
+
+    - name: Display ethernet interfaces
+      debug:
+        msg: "Ethernet interfaces: {{ ethernet_interfaces | join(', ') }}"
+
+    - name: Get memory info with filters
+      debug:
+        msg: "Total memory: {{ (ansible_facts.memtotal_mb / 1024) | round(2) }} GB"
+
+    - name: Get OS distribution
+      debug:
+        msg: "OS: {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+
+    - name: Create config from facts
+      copy:
+        content: |
+          # Auto-generated config from system facts
+          HOSTNAME={{ ansible_facts.hostname }}
+          IP_ADDRESS={{ primary_ip }}
+          OS={{ ansible_facts.distribution }}
+          CPU_CORES={{ ansible_facts.processor_cores }}
+          TOTAL_RAM_GB={{ (ansible_facts.memtotal_mb / 1024) | round(2) }}
+        dest: /tmp/system_facts.conf
+      changed_when: false
+
+    - name: Display generated config
+      command: cat /tmp/system_facts.conf
+      register: config_content
+
+    - name: Show config
+      debug:
+        msg: "{{ config_content.stdout_lines }}"

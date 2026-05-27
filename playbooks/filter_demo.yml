@@ -1,0 +1,61 @@
+---
+- name: Demonstrate advanced filters
+  hosts: localhost
+  gather_facts: yes
+  vars:
+    users:
+      - name: "admin"
+        role: "administrator"
+        uid: 1000
+      - name: "deploy"
+        role: "deployer"
+        uid: 1001
+      - name: "monitor"
+        role: "monitoring"
+        uid: 1002
+    
+    nginx_config:
+      server_name: "example.com"
+      listen_port: 80
+      locations:
+        - path: "/"
+          proxy_pass: "http://backend:8000"
+        - path: "/api"
+          proxy_pass: "http://api:9000"
+
+  tasks:
+    - name: Extract specific field with map filter
+      debug:
+        msg: "User names: {{ users | map(attribute='name') | list | join(', ') }}"
+
+    - name: Select users with uid > 1000
+      set_fact:
+        high_uids: "{{ users | selectattr('uid', 'gt', 1000) | list }}"
+
+    - name: Display high UID users
+      debug:
+        msg: "Users with UID > 1000: {{ high_uids }}"
+
+    - name: Transform data with json_query
+      set_fact:
+        locations_paths: "{{ nginx_config.locations | json_query('[*].path') }}"
+
+    - name: Display locations paths
+      debug:
+        msg: "Location paths: {{ locations_paths | join(', ') }}"
+
+    - name: Combine filters - upper and replace
+      set_fact:
+        formatted_server_name: "{{ nginx_config.server_name | upper | replace('.', '_') }}"
+
+    - name: Display formatted name
+      debug:
+        msg: "Formatted server name: {{ formatted_server_name }}"
+
+    - name: Default filter example
+      debug:
+        msg: "Undefined variable value: {{ undefined_var | default('Default value') }}"
+
+    - name: Ternary operator example
+      debug:
+        msg: "Server is {{ 'production' if nginx_config.listen_port == 80 else 'staging' }}"
