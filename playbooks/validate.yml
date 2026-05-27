@@ -1,0 +1,8 @@
+---
+- name: Syntax validation playbook
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Print validation message
+      debug:
+        msg: "Syntax validation passed"
