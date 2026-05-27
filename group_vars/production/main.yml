@@ -1,0 +1,8 @@
+---
+env: production
+app_port: 80
+server_name: prod.example.com
+db_host: prod-db.example.com
+db_password: "{{ vault_db_password_prod }}"
+app_debug_mode: false
+nginx_worker_processes: auto

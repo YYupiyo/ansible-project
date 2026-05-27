@@ -1,0 +1,8 @@
+---
+env: staging
+app_port: 8080
+server_name: staging.example.com
+db_host: staging-db.example.com
+db_password: "{{ vault_db_password_staging }}"
+app_debug_mode: true
+nginx_worker_processes: 1

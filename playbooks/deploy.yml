@@ -1,22 +1,18 @@
 ---
-- name: Deploy web server
+- name: Deploy application to staging
   hosts: staging
   become: yes
-  vars:
-    app_port: 8080
-    server_name: staging.example.com
-    env: staging
+  vars_files:
+    - ../group_vars/staging/main.yml
   roles:
     - role_web
     - role_app
 
-- name: Deploy web server production
+- name: Deploy application to production
   hosts: production
   become: yes
-  vars:
-    app_port: 80
-    server_name: prod.example.com
-    env: production
+  vars_files:
+    - ../group_vars/production/main.yml
   roles:
     - role_web
     - role_app
