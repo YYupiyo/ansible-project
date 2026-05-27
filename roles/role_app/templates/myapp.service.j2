@@ -1,11 +1,15 @@
 [Unit]
 Description=My Flask Application
-After=network.target
+After=network.target postgresql.service
 
 [Service]
 User=www-data
 WorkingDirectory=/opt/myapp
 Environment="ENV={{ env }}"
+Environment="DB_HOST={{ db_host }}"
+Environment="DB_NAME={{ db_name }}"
+Environment="DB_USER={{ db_user }}"
+Environment="DB_PASSWORD={{ db_password }}"
 ExecStart=/usr/bin/python3 /opt/myapp/app.py
 Restart=always
 

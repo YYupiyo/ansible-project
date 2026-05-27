@@ -1,0 +1,35 @@
+---
+- name: Install PostgreSQL
+  apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+    state: present
+    update_cache: yes
+
+- name: Ensure PostgreSQL is running
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Create database user
+  postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    role_attr_flags: CREATEDB
+  become_user: postgres
+  notify: restart postgresql
+
+- name: Create database
+  postgresql_db:
+    name: "{{ db_name }}"
+    owner: "{{ db_user }}"
+  become_user: postgres
+
+- name: Allow connections from app
+  postgresql_query:
+    db: "{{ db_name }}"
+    query: "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+  become_user: postgres
+  ignore_errors: yes

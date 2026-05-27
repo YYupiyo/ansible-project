@@ -1,20 +1,22 @@
 ---
-- name: Deploy application to staging
-  hosts: staging
+- name: Deploy database
+  hosts: all
   become: yes
   vars_files:
-    - ../group_vars/staging/main.yml
-    - ../group_vars/staging/vault.yml
+    - ../group_vars/{{ env }}/vault.yml
   roles:
-    - role_web
-    - role_app
+    - role_db
+  tags:
+    - db
 
-- name: Deploy application to production
-  hosts: production
+- name: Deploy web server and application
+  hosts: all
   become: yes
   vars_files:
-    - ../group_vars/production/main.yml
-    - ../group_vars/production/vault.yml
+    - ../group_vars/{{ env }}/main.yml
+    - ../group_vars/{{ env }}/vault.yml
   roles:
     - role_web
     - role_app
+  tags:
+    - app
