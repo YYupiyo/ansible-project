@@ -1,0 +1,17 @@
+---
+- name: Test custom filters
+  hosts: localhost
+  gather_facts: no
+  
+  vars:
+    test_ip: "192.168.1.100"
+    test_env: "staging"
+  
+  tasks:
+    - name: Test mask_ip filter
+      debug:
+        msg: "Masked IP: {{ test_ip | mask_ip }}"
+
+    - name: Test format_env filter
+      debug:
+        msg: "Formatted env: {{ test_env | format_env }}"
