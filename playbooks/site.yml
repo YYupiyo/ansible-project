@@ -1,6 +1,6 @@
 ---
 - name: Check inventory and connection
-  host: all
+  hosts: all
   gather_facts: no
   tasks:
     - name: Print environment
