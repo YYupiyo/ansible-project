@@ -1,10 +1,32 @@
 server {
-    listen {{ app_port | default(80) }};
-    server_name {{ server_name | default('localhost') }};
+    listen {{ app_port }};
+    server_name {{ server_name }} {% for alias in server_aliases %} {{ alias }}{% endfor %};
+
+    # Условная логика в зависимости от окружения
+    {% if env == 'production' %}
+    # В production включена SSL (пример)
+    # listen 443 ssl;
+    client_max_body_size 10M;
+    access_log /var/log/nginx/{{ server_name | replace('.', '_') }}_access.log;
+    error_log /var/log/nginx/{{ server_name | replace('.', '_') }}_error.log;
+    {% else %}
+    # В staging отладка и меньшие лимиты
+    client_max_body_size 1M;
+    access_log /var/log/nginx/{{ server_name | default('default') | replace('.', '_') }}_access.log;
+    {% endif %}
+
+    # Использование фильтра upper
+    add_header X-Environment "{{ env | upper }}";
 
     location / {
         proxy_pass http://localhost:5000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Environment {{ env | upper }};
     }
+
+    {% if app_debug_mode %}
+    # В режиме отладки добавляем заголовки для диагностики
+    add_header X-Debug-Mode "enabled";
+    {% endif %}
 }

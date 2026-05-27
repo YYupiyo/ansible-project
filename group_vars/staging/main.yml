@@ -2,6 +2,9 @@
 env: staging
 app_port: 8080
 server_name: staging.example.com
+server_aliases:
+  - staging1.example.com
+  - staging2.example.com
 db_host: staging-db.example.com
 db_password: "{{ vault_db_password_staging }}"
 app_debug_mode: true

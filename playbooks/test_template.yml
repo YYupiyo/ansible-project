@@ -1,0 +1,33 @@
+---
+- name: Test Jinja2 template locally
+  hosts: localhost
+  become: no
+  vars:
+    env: staging
+    app_port: 8080
+    server_name: staging.example.com
+    server_aliases:
+      - staging1.example.com
+      - staging2.example.com
+    app_debug_mode: true
+  tasks:
+    - name: Render nginx config template
+      template:
+        src: ../roles/role_web/templates/nginx.conf.j2
+        dest: /tmp/test_nginx.conf
+      vars:
+        env: staging
+        app_port: 8080
+        server_name: staging.example.com
+        server_aliases:
+          - staging1.example.com
+          - staging2.example.com
+        app_debug_mode: true
+
+    - name: Show rendered config
+      command: cat /tmp/test_nginx.conf
+      register: config_output
+
+    - name: Print config
+      debug:
+        msg: "{{ config_output.stdout_lines }}"
