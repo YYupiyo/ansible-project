@@ -1,0 +1,86 @@
+---
+- name: Deploy with error handling and notifications
+  hosts: localhost
+  become: no
+  gather_facts: yes
+  vars:
+    deployment_status: "success"
+  
+  tasks:
+    - name: Main deployment block with error handling
+      block:
+        - name: Start deployment
+          debug:
+            msg: "Starting deployment at {{ ansible_date_time.iso8601 }}"
+
+        - name: Check prerequisites
+          fail:
+            msg: "Prerequisites check failed - missing required variable"
+          when: required_var is not defined
+
+        - name: Simulate database migration
+          debug:
+            msg: "Running database migrations..."
+          register: migration_result
+
+        - name: Simulate app deployment
+          debug:
+            msg: "Deploying application..."
+          
+        - name: Simulate service restart
+          debug:
+            msg: "Restarting services..."
+          
+        - name: Health check
+          uri:
+            url: http://localhost/health
+            status_code: 200
+            timeout: 10
+          ignore_errors: yes
+          register: health_check
+
+        - name: Fail if health check fails
+          fail:
+            msg: "Health check failed after deployment"
+          when: health_check.status != 200
+
+      rescue:
+        - name: Handle deployment failure
+          set_fact:
+            deployment_status: "failure"
+          
+        - name: Rollback database
+          debug:
+            msg: "ROLLBACK: Reverting database migrations..."
+          
+        - name: Rollback application
+          debug:
+            msg: "ROLLBACK: Reverting to previous version..."
+          
+        - name: Send failure notification
+          include_role:
+            name: role_notify
+          vars:
+            deployment_status: "failure"
+
+      always:
+        - name: Cleanup temporary files
+          file:
+            path: /tmp/deploy_temp
+            state: absent
+          ignore_errors: yes
+
+        - name: Send final status notification
+          include_role:
+            name: role_notify
+          vars:
+            deployment_status: "{{ deployment_status | default('success') }}"
+
+        - name: Display deployment summary
+          debug:
+            msg: |
+              ====================================
+              DEPLOYMENT SUMMARY
+              Status: {{ deployment_status | default('success') | upper }}
+              Time: {{ ansible_date_time.iso8601 }}
+              ====================================

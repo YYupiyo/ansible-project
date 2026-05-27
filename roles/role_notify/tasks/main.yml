@@ -1,0 +1,24 @@
+---
+- name: Send success notification
+  debug:
+    msg: |
+      ====================================
+      DEPLOYMENT SUCCESSFUL
+      Environment: {{ env | default('unknown') }}
+      Host: {{ ansible_facts.hostname | default('unknown') }}
+      Time: {{ ansible_date_time.iso8601 }}
+      ====================================
+  when: deployment_status == "success"
+  notify: log_success
+
+- name: Send failure notification
+  debug:
+    msg: |
+      ====================================
+      DEPLOYMENT FAILED
+      Environment: {{ env | default('unknown') }}
+      Host: {{ ansible_facts.hostname | default('unknown') }}
+      Time: {{ ansible_date_time.iso8601 }}
+      ====================================
+  when: deployment_status == "failure"
+  notify: log_failure

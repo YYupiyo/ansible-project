@@ -1,0 +1,48 @@
+---
+- name: Simple deployment with error handling
+  hosts: localhost
+  gather_facts: yes
+  
+  tasks:
+    - name: Main deployment block
+      block:
+        - name: Task 1 - Start deployment
+          debug:
+            msg: "Starting deployment..."
+        
+        - name: Task 2 - Simulate work
+          debug:
+            msg: "Deploying application..."
+        
+        - name: Task 3 - Simulate error (for testing)
+          fail:
+            msg: "Simulated deployment error"
+          when: error_expected | default(false)
+          
+        - name: Task 4 - This will not run if error occurs
+          debug:
+            msg: "This task runs only on success"
+      
+      rescue:
+        - name: Rescue block - Handle error
+          debug:
+            msg: "ERROR: Deployment failed! Running rollback..."
+        
+        - name: Simulate rollback
+          debug:
+            msg: "Rolling back to previous version..."
+      
+      always:
+        - name: Always block - Cleanup and notify
+          debug:
+            msg: "Deployment finished. Sending notification..."
+        
+        - name: Write to log file
+          copy:
+            content: "Deployment completed at {{ ansible_date_time.iso8601 }}"
+            dest: /tmp/deploy.log
+          ignore_errors: yes
+
+    - name: Show final status
+      debug:
+        msg: "Playbook execution completed"

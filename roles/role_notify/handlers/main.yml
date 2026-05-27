@@ -1,0 +1,12 @@
+---
+- name: log_success
+  copy:
+    content: "SUCCESS: {{ ansible_date_time.iso8601 }} - {{ env }}"
+    dest: /var/log/ansible_deploy.log
+    mode: '0644'
+
+- name: log_failure
+  copy:
+    content: "FAILURE: {{ ansible_date_time.iso8601 }} - {{ env }}"
+    dest: /var/log/ansible_deploy.log
+    mode: '0644'
