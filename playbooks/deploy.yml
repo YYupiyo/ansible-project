@@ -1,0 +1,22 @@
+---
+- name: Deploy web server
+  hosts: staging
+  become: yes
+  vars:
+    app_port: 8080
+    server_name: staging.example.com
+    env: staging
+  roles:
+    - role_web
+    - role_app
+
+- name: Deploy web server production
+  hosts: production
+  become: yes
+  vars:
+    app_port: 80
+    server_name: prod.example.com
+    env: production
+  roles:
+    - role_web
+    - role_app
