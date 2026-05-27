@@ -1,0 +1,31 @@
+name: Validate Ansible Syntax
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install ansible -y
+
+      - name: Check syntax of all playbooks
+        run: |
+          for playbook in playbooks/*.yml; do
+            echo "Checking $playbook"
+            ansible-playbook --syntax-check $playbook
+          done
+
+      - name: Validate inventory
+        run: |
+          ansible-inventory -i inventories/staging.ini --list
+          ansible-inventory -i inventories/production.ini --list

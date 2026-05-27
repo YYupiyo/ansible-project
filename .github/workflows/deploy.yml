@@ -1,0 +1,58 @@
+name: Ansible Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'playbooks/**'
+      - 'roles/**'
+      - 'group_vars/**'
+      - 'inventories/**'
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install ansible -y
+
+      - name: Create vault password file
+        run: |
+          echo "${{ secrets.VAULT_PASSWORD }}" > .vault_pass
+          chmod 600 .vault_pass
+
+      - name: Run Ansible playbook on staging
+        run: |
+          ansible-playbook -i inventories/staging.ini playbooks/site.yml \
+            --vault-password-file .vault_pass \
+            --extra-vars "env=staging"
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install ansible -y
+
+      - name: Create vault password file
+        run: |
+          echo "${{ secrets.VAULT_PASSWORD }}" > .vault_pass
+          chmod 600 .vault_pass
+
+      - name: Run Ansible playbook on production
+        run: |
+          ansible-playbook -i inventories/production.ini playbooks/site.yml \
+            --vault-password-file .vault_pass \
+            --extra-vars "env=production"
